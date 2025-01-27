@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block content %}
+    <div class="container-fluid px-4">
+        <h2 class="my-4">출고 작업</h2>
+        
+
+        <div class="row">
+            <div class="col-xl-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <div class="my-1">
+                            <i class="fa-solid fa-location-dot me-1"></i>
+                            주소 작업
+                        </div>
+                    </div>
+                    <form action="{% url 'separate_address' %}" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="card-body py-4">
+                            <h4 class="small">한 문장의 주소를 City, Street, District로 분할하기 위한 작업입니다.</h4>
+                            <h4 class="small">작업하고자 하는 엑셀을 첨부한 뒤 "시작" 버튼을 눌러주세요 :)</h4>
+                            <div class="mt-4">
+                                    <input class="form-control form-control-sm" name="addressFile" id="formFileSm" type="file">
+                                </div>
+                        </div>
+                        <div class="card-footer d-flex justify-content-end">
+                            <button type="submit" class="btn btn-sm btn-primary">시작</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <div class="my-1">
+                            <i class="fas fa-chart-bar me-1"></i>
+                            다음 작업
+                        </div>
+                    </div>
+                    <div class="card-body py-4">
+                        <h4 class="small">개발 중,,,,,</h4>
+                        <h4 class="small">열심히 하는 중,,,</h4>
+                        <div class="mt-4">
+                            <input class="form-control form-control-sm" id="formFileSm2" type="file">
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex justify-content-end">
+                        <button type="button" class="btn btn-sm btn-primary">시작</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+{% endblock %}
