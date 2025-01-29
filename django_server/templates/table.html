@@ -3,26 +3,20 @@
 
 {% block content %}
     <div class="container-fluid px-4">
-        <h1 class="mt-4">Tables</h1>
-        <ol class="breadcrumb mb-4">
-            <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
-            <li class="breadcrumb-item active">Tables</li>
-        </ol>
+        <h2 class="my-4">테이블</h2>
         <div class="card mb-4">
             <div class="card-body">
-                DataTables is a third party plugin that is used to generate the demo table below. For more information about DataTables, please visit the
-                <a target="_blank" href="https://datatables.net/">official DataTables documentation</a>
-                .
+                <h4 class="small mt-2">다이슨 판매코드 정리 엑셀 추가 예정.</h4>
             </div>
         </div>
         <div class="card mb-4">
             <div class="card-header">
                 <i class="fas fa-table me-1"></i>
-                DataTable Example
+                다이슨 판매코드 정리
             </div>
             <div class="card-body">
                 <table id="datatablesSimple">
-                    <thead>
+                    {% comment %} <thead>
                         <tr>
                             <th>Name</th>
                             <th>Position</th>
@@ -499,7 +493,7 @@
                             <td>2011/01/25</td>
                             <td>$112,000</td>
                         </tr>
-                    </tbody>
+                    </tbody> {% endcomment %}
                 </table>
             </div>
         </div>

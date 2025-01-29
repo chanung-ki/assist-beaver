@@ -42,8 +42,10 @@ class User(AbstractBaseUser, TimeModel):
         default=False
     )
     companyFK = models.ForeignKey(
-        'user.User',
-        on_delete=models.CASCADE
+        'user.CompanyIndexModel',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
 
     objects = UserManager()
