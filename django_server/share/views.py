@@ -3,8 +3,6 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 
 from share.decorators import login_required, not_allow_login, admin_only
-from user.models import User, CompanyIndexModel
-
 
 def signin_view(request):
     if request.method == 'GET':

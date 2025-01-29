@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, HttpResponseNotAllowed, JsonResponse
+from django.contrib import messages
+from django.http import HttpResponse
 
 import pandas as pd
 import os
@@ -7,6 +8,7 @@ from io import BytesIO
 
 from share.decorators import login_required
 from .utills import get_separated_address_df
+
 
 # Create your views here.
 @login_required
@@ -19,35 +21,41 @@ def table(request):
 
 @login_required
 def separate_address(request):
-    
-    if not request.method == 'POST':
-        return HttpResponseNotAllowed(['POST'])
-    
-    uploaded_file = request.FILES.get('addressFile')
-    if not uploaded_file:
-        return JsonResponse({'error': '파일을 첨부 해주세요.'}, status=400)
+    try:
+        if not request.method == 'POST':
+            msg = '잘못된 접근입니다.'
+            messages.add_message(request, messages.ERROR, msg)
+            return redirect('index')
+        
+        uploaded_file = request.FILES.get('addressFile')
+        if not uploaded_file:
+            msg = '파일을 첨부해주세요.'
+            messages.add_message(request, messages.ERROR, msg)
+            return redirect('shipping')
 
-    uploaded_file = request.FILES.get('addressFile')
-    
-    # 파일을 DataFrame으로 변환    
-    df = pd.read_excel(uploaded_file)
-    address_df = df['신주소']
-    address_df.str.strip()
-    
-    # 도로가 분리된 DataFrame을 받은 후 파일로 만듬
-    result_df = pd.DataFrame(get_separated_address_df(address_df))
-    
-    output = BytesIO()
-    result_df.to_excel(output, index=False)
-    output.seek(0)  # 파일 시작으로 이동
+        uploaded_file = request.FILES.get('addressFile')
+        
+        # 파일을 DataFrame으로 변환    
+        df = pd.read_excel(uploaded_file)
+        address_df = df['신주소']
+        address_df.str.strip()
+        
+        # 도로가 분리된 DataFrame을 받은 후 파일로 만듬
+        result_df = pd.DataFrame(get_separated_address_df(address_df))
+        
+        output = BytesIO()
+        result_df.to_excel(output, index=False)
+        output.seek(0)  # 파일 시작으로 이동
 
-    # HttpResponse로 파일 반환
-    response = HttpResponse(output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename="separated-address.xlsx"'
-    
-    return response
-    
-    # return redirect('msk_shipping')
+        # HttpResponse로 파일 반환
+        response = HttpResponse(output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="separated-address.xlsx"'
+        
+        return response
+    except:
+        msg = '오류가 발생했습니다.'
+        messages.add_message(request, messages.ERROR, msg)
+        return redirect('shipping')
     
 
 
