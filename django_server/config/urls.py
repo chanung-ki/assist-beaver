@@ -16,13 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from share.views import index, raw_index
+from share.views import index, raw_index, signin
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     
     # share
     path('', index, name='index'),
+    path('signin', signin, name='signin'),
     path('raw-index', raw_index, name='raw-indexex'),
     
     # msk
