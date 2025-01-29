@@ -5,16 +5,19 @@ import pandas as pd
 import os
 from io import BytesIO
 
+from share.decorators import login_required
 from .utills import get_separated_address_df
 
 # Create your views here.
+@login_required
 def shipping(request):
     return render(request, 'shipping.html')
 
+@login_required
 def table(request):
     return render(request, 'table.html')
 
-
+@login_required
 def separate_address(request):
     
     if not request.method == 'POST':
