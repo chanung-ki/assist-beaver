@@ -1,8 +1,7 @@
-# prod.py
-
 from .base import *
 
-DEBUG = False
+# DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [ 
 	'52.79.140.89',
@@ -10,4 +9,8 @@ ALLOWED_HOSTS = [
 
 STATIC_URL = 'static/'
 
-STATIC_ROOT = BASE_DIR / 'static'
+# STATIC_ROOT = BASE_DIR / 'static'
+
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
