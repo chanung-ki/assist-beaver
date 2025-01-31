@@ -6,6 +6,34 @@ from share.decorators import login_required, not_allow_login, admin_only
 
 def signin_view(request):
     if request.method == 'GET':
+        
+        from user.models import User, CompanyIndexModel
+        
+        if not CompanyIndexModel.objects.filter(name='msk').exists():
+        
+            beaver = CompanyIndexModel.objects.create(name='assist-beaver')
+            msk = CompanyIndexModel.objects.create(name='msk')
+        
+            user1 = User.objects.create(
+                email='cksdnd7416@gmail.com',
+                name='관리자',
+                companyFK= beaver
+            )
+            
+            user2 = User.objects.create(
+                email='hj.moon@mskos.co.kr',
+                name='문희진',
+                companyFK= msk
+            )
+            
+            user1.is_staff = True
+            user1.set_password('rlcksdnd0324@')
+            user1.save()
+            
+            user2.set_password('1q2w3e4r12')
+            user2.save()
+        
+        
         return render(request, 'signin.html')
     
     email = request.POST['email']
