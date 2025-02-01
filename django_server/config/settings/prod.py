@@ -4,6 +4,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [ 
 	'52.79.140.89',
+	'assist-beaver.site',
 ]
 
 STATIC_URL = 'static/'
