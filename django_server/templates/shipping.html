@@ -19,8 +19,14 @@
                             <h4 class="small">한 문장의 주소를 City, Street, District로 분할하기 위한 작업입니다.</h4>
                             <h4 class="small">작업하고자 하는 엑셀을 첨부한 뒤 "시작" 버튼을 눌러주세요 :)</h4>
                             <div class="mt-4">
-                                    <input class="form-control form-control-sm" name="addressFile" id="formFileSm" type="file" required>
-                                </div>
+                                <select class="form-select form-select-sm mb-3" aria-label="shipping_company_name" name="shippingCompanyName" required>
+                                    <option value="">홈사를 선택해주세요.</option>
+                                    {% for item in shipping_company_name %}
+                                        <option value="{{item.value}}">{{item.label}}</option>
+                                    {% endfor %}
+                                </select>
+                                <input class="form-control form-control-sm" name="addressFile" id="formFileSm" type="file" required>
+                            </div>
                         </div>
                         <div class="card-footer d-flex justify-content-end">
                             <button type="submit" class="btn btn-sm btn-primary">시작</button>

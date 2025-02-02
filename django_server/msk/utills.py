@@ -1,4 +1,93 @@
 import re
+import pandas as pd
+import msoffcrypto
+from io import BytesIO
+import zipfile
+
+ERROR_MESSAGE = {
+    1: {
+        'msg' : '주소 컬럼을 찾을 수 없습니다. 다른 홈사 파일을 첨부하신것은 아닌지 확인해주세요.'
+    },
+    2: {
+        'msg' : '파일에 비밀번호가 걸려있습니다. 다른 홈사 파일을 첨부하신것은 아닌지 확인해주세요.'
+    },  
+}
+SHIPPING_COMPANY_NAME = [
+    {
+        'label': 'CJ',
+        'value': 'CJ',
+    },
+    {
+        'label': 'GS',
+        'value': 'GS',
+    },
+    {
+        'label': 'HD',
+        'value': 'HD',
+    },
+]
+COLUMN_INFO = {
+    'CJ' : {
+        'address': '신주소',
+    },
+    'GS' : {
+        'address': '수취인주소',
+    },
+    'HD' : {
+        'address': '인수자 주소',
+    },
+}
+HD_PASSWORD = '021093'
+    
+
+def get_address_df(uploaded_file, shipping_company_name):
+    """
+        홈사에 따라 엑셀파일에서 다른 로직을 통해 df 반환
+    """
+    if shipping_company_name == 'HD':
+        # 파일을 메모리에서 읽기
+        file_stream = BytesIO(uploaded_file.read())
+        
+        # 암호로 보호된 파일 열기
+        office_file = msoffcrypto.OfficeFile(file_stream)
+        office_file.load_key(password=HD_PASSWORD)  # 암호 입력
+        
+        # 암호를 해제하여 파일 저장
+        decrypted_file = BytesIO()
+        office_file.decrypt(decrypted_file)
+        
+        # 암호가 해제된 파일을 다시 열기
+        decrypted_file.seek(0)
+        from openpyxl import load_workbook
+        wb = load_workbook(decrypted_file)
+        
+        ws = wb.active
+        data = ws.values
+        columns = next(data)
+        df = pd.DataFrame(data, columns=columns)
+        
+    else:
+        try:
+            if uploaded_file.name.endswith('.xls'):
+                df = pd.read_excel(uploaded_file, engine='xlrd')
+            elif uploaded_file.name.endswith('.xlsx'):
+                df = pd.read_excel(uploaded_file, engine='openpyxl')
+        except zipfile.BadZipFile:
+            # 홈사를 현대로 선택하지 않고 현대 파일을 첨부할 경우 BadZipFile 발생
+            return 2, None
+            
+    column_name = COLUMN_INFO[shipping_company_name]['address']
+    try:
+        # 주소가 공백인 행 제거
+        df = df.dropna(subset=[column_name])
+    except:
+        # 홈사와, 홈사파일을 일치시켜서 첨부하지 않은 경우 code=1 반환
+        # ex 홈사 : CJ , 파일 : GS 파일
+        return 1, None
+    address_df = df[column_name]
+    address_df = address_df.str.strip()
+
+    return 0, address_df
 
 
 def extract_road_name_address(address):
