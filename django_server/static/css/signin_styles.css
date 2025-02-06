@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css?family=Montserrat:400,800');
+
+body {
+    background: #f6f5f7;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: 'Montserrat', sans-serif;
+    height: 100vh;
+    margin: -20px 0 50px;
+}
+
+button {
+    border-radius: 20px;
+    border: 1px solid #754E1A;
+    background-color: #754E1A;
+    color: #FFFFFF;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 10px 45px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: transform 80ms ease-in;
+    cursor: pointer;
+}
+
+button:active {
+    transform: scale(0.95);
+}
+
+    button:focus {
+    outline: none;
+}
+
+button.ghost {
+    background-color: transparent;
+    border-color: #FFFFFF;
+}
+
+input {
+    background-color: #e6e6e6;
+    border: none;
+    padding: 12px 15px;
+    margin: 8px 0;
+    width: 100%;
+    font-size: 14px;
+}
+
+.signin-container{
+    box-shadow: 0 5px 8px 0 rgba(0, 0, 0, 0.1), 0 9px 26px 0 rgba(0, 0, 0, 0.1);
+}
+
+.signin-form{
+    padding: 10%;
+}
+
+.signin-form h1{
+    text-align: center;
+    color: #333;
+    font-weight: bold;
+}
+
+.msg-text{
+    color: #754E1A;
+    font-weight: 600;
+}
+
+.overlay-panel {
+    padding: 10%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex-direction: column;
+    background: #C7B7A3;
+}
+
+.overlay-panel h1{
+    text-align: center;
+    color: #fff;
+    font-weight: bold;
+}
+
+.overlay-panel p {
+    font-size: 14px;
+    font-weight: 100;
+    line-height: 20px;
+    letter-spacing: 0.5px;
+    margin: 20px 0 30px;
+    color: #fff;
+}
