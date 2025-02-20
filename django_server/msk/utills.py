@@ -1,44 +1,12 @@
+import os
 import re
 import pandas as pd
 import msoffcrypto
 from io import BytesIO
 import zipfile
+from dotenv import load_dotenv
 
-ERROR_MESSAGE = {
-    1: {
-        'msg' : '주소 컬럼을 찾을 수 없습니다. 다른 홈사 파일을 첨부하신것은 아닌지 확인해주세요.'
-    },
-    2: {
-        'msg' : '파일에 비밀번호가 걸려있습니다. 다른 홈사 파일을 첨부하신것은 아닌지 확인해주세요.'
-    },  
-}
-SHIPPING_COMPANY_NAME = [
-    {
-        'label': 'CJ',
-        'value': 'CJ',
-    },
-    {
-        'label': 'GS',
-        'value': 'GS',
-    },
-    {
-        'label': 'HD',
-        'value': 'HD',
-    },
-]
-COLUMN_INFO = {
-    'CJ' : {
-        'address': '신주소',
-    },
-    'GS' : {
-        'address': '수취인주소',
-    },
-    'HD' : {
-        'address': '인수자 주소',
-    },
-}
-HD_PASSWORD = '021093'
-    
+from .constants import COLUMN_INFO
 
 def get_address_df(uploaded_file, shipping_company_name):
     """
@@ -49,8 +17,10 @@ def get_address_df(uploaded_file, shipping_company_name):
         file_stream = BytesIO(uploaded_file.read())
         
         # 암호로 보호된 파일 열기
+        load_dotenv()
+        password = os.getenv("HD_PASSWORD")
         office_file = msoffcrypto.OfficeFile(file_stream)
-        office_file.load_key(password=HD_PASSWORD)  # 암호 입력
+        office_file.load_key(password=password)  # 암호 입력
         
         # 암호를 해제하여 파일 저장
         decrypted_file = BytesIO()

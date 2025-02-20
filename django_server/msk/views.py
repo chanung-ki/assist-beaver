@@ -7,8 +7,8 @@ import os
 from io import BytesIO
 
 from share.decorators import login_required
-from .utills import ERROR_MESSAGE, SHIPPING_COMPANY_NAME, get_separated_address_df, get_address_df
-
+from .utills import get_separated_address_df, get_address_df
+from .constants import ERROR_MESSAGE, SHIPPING_COMPANY_NAME
 
 # Create your views here.
 @login_required
