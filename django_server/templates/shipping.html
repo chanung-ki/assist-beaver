@@ -34,6 +34,33 @@
                     </form>
                 </div>
             </div>
+            <div class="col-xl-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <div class="my-1">
+                            <i class="fa-solid fa-location-dot me-1"></i>
+                            출고 작업
+                        </div>
+                    </div>
+                    <form action="{% url 'convert_shipping_file' %}" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="card-body py-4">
+                            <div class="mt-4">
+                                <select class="form-select form-select-sm mb-3" aria-label="shipping_company_name" name="shippingCompanyName" required>
+                                    <option value="">홈사를 선택해주세요.</option>
+                                    {% for item in shipping_company_name %}
+                                        <option value="{{item.value}}">{{item.label}}</option>
+                                    {% endfor %}
+                                </select>
+                                <input class="form-control form-control-sm" name="rawFile" id="formFileSm" type="file" required>
+                            </div>
+                        </div>
+                        <div class="card-footer d-flex justify-content-end">
+                            <button type="submit" class="btn btn-sm btn-secondary custom-btn-bg custom-btn-border">시작</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 

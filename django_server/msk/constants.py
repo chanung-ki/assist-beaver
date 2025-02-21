@@ -22,14 +22,53 @@ SHIPPING_COMPANY_NAME = [
     },
 ]
 
+# 주문번호 앞에 붙는 시그니처
+SHIPPING_COMPANY_SIGNATURE = {
+    'CJ': 'T-',
+    'GS': 'T_',
+    'HD': 'T'
+}
+
+# 각 홈사별 컬럼 정보
 COLUMN_INFO = {
     'CJ' : {
         'address': '신주소',
+        'base_name': '인수자',
+        'sub_name': '주문자',
+        'base_hp': '인수자hp',
+        'sub_hp': '인수자tel',
+        'order_number': '주문번호',
     },
     'GS' : {
         'address': '수취인주소',
+        'base_name': '주문자',
+        'sub_name': '수취인',
+        'base_hp': '주문자전화번호',
+        'sub_hp': '주문자핸드폰',
     },
     'HD' : {
         'address': '인수자 주소',
+        'base_name': '인수자',
+        'sub_name': '주문자',
+        'base_hp': '인수자 HP',
+        'sub_hp': '일반전화(인수자)',
     },
 }
+
+REQUIRED_COLUMN = {
+    'CJ': [
+        '배송확인',
+        '인수자',
+        '주문자',
+        '주문번호',
+        '상품코드',
+        '옵션코드',
+        '상품명',
+        '수량',
+        '인수자tel',
+        '인수자hp',
+        '신우편번호',
+        '신주소',
+    ],
+}
+
