@@ -8,11 +8,16 @@
         <meta name="description" content="" />
         <meta name="author" content="" />
         <title>Assist-Beaver</title>
+        <link rel="icon" href="{% static 'assets/favicon.png' %}" type="image/x-icon">
         <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
         <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     </head>
     <body class="sb-nav-fixed">
+        <!-- jquery cdn-->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- jquery cdn-->
+
         <nav class="sb-topnav navbar navbar-expand navbar-dark custom-bg custom-border-bottom">
             <!-- Navbar Brand-->
             <a class="navbar-brand ps-3" href="{% url 'index' %}">Assist-Beaver</a>
@@ -40,19 +45,23 @@
                             <div class="sb-sidenav-menu-heading">Core</div>
                             <a class="nav-link" href="{% url 'index' %}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                                메인
+                                <span class="small">메인</span>
                             </a>
                             <hr class="mb-0 mx-3">
                             <div class="sb-sidenav-menu-heading">WORK</div>
-                            <a class="nav-link" href="{% url 'msk_shipping' %}">
-                                <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                                출고
+                            <a class="nav-link" href="{% url 'shipping_task' %}">
+                                <div class="sb-nav-link-icon"><i class="fa-solid fa-box"></i></div>
+                                <span class="small">단위별 출고 작업</span>
+                            </a>
+                            <a class="nav-link" href="{% url 'shipping_total' %}">
+                                <div class="sb-nav-link-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+                                <span class="small">통합 출고 작업</span>
                             </a>
                             <hr class="mb-0 mx-3">
                             <div class="sb-sidenav-menu-heading">DATA</div>
                             <a class="nav-link" href="{% url 'msk_table' %}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
-                                테이블
+                                <span class="small">테이블</span>
                             </a>
                         </div>
                     </div>

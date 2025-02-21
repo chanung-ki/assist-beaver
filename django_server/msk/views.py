@@ -14,10 +14,15 @@ from .constants import ERROR_MESSAGE, SHIPPING_COMPANY_NAME, REQUIRED_COLUMN
 
 # Create your views here.
 @login_required
-def shipping(request):
-    
+def shipping_task(request):
     data = {'shipping_company_name' : SHIPPING_COMPANY_NAME}
-    return render(request, 'shipping.html', data)
+    return render(request, 'shipping_task.html', data)
+
+
+@login_required
+def shipping_total(request):
+    data = {'shipping_company_name' : SHIPPING_COMPANY_NAME}
+    return render(request, 'shipping_total.html', data)
 
 
 @login_required
@@ -37,27 +42,27 @@ def separate_address(request):
         if not shipping_company_name:
             msg = '홈사를 선택해주세요.'
             messages.add_message(request, messages.ERROR, msg)
-            return redirect('msk_shipping')
+            return redirect('shipping_task')
         
         uploaded_file = request.FILES.get('addressFile')
         if not uploaded_file:
             msg = '파일을 첨부해주세요.'
             messages.add_message(request, messages.ERROR, msg)
-            return redirect('msk_shipping')
+            return redirect('shipping_task')
         
         # 홈사에 따라 파일을 DataFrame으로 변환
         code, df = get_df(uploaded_file, shipping_company_name)
         if not code == 0:
             msg = ERROR_MESSAGE[code]['msg']
             messages.add_message(request, messages.ERROR, msg)
-            return redirect('msk_shipping')
+            return redirect('shipping_task')
         
         # df에서 address df만 정제해서 추출
         code, address_df = get_address_df(df, shipping_company_name)
         if not code == 0:
             msg = ERROR_MESSAGE[code]['msg']
             messages.add_message(request, messages.ERROR, msg)
-            return redirect('msk_shipping')
+            return redirect('shipping_task')
         
         # 도로가 분리된 df 받은 후 파일로 만듬
         result_df = get_separated_address_df(address_df)
@@ -75,7 +80,7 @@ def separate_address(request):
     except:
         msg = '오류가 발생했습니다.'
         messages.add_message(request, messages.ERROR, msg)
-        return redirect('msk_shipping')
+        return redirect('shipping_task')
     
 
 
@@ -90,13 +95,13 @@ def convert_shipping_file(request):
     if not shipping_company_name:
         msg = '홈사를 선택해주세요.'
         messages.add_message(request, messages.ERROR, msg)
-        return redirect('msk_shipping')
+        return redirect('shipping_total')
     
     uploaded_file = request.FILES.get('rawFile')
     if not uploaded_file:
         msg = '파일을 첨부해주세요.'
         messages.add_message(request, messages.ERROR, msg)
-        return redirect('msk_shipping')
+        return redirect('shipping_total')
     
     
     # 홈사에 따라 파일을 DataFrame으로 변환
@@ -104,7 +109,7 @@ def convert_shipping_file(request):
     if not code == 0:
         msg = ERROR_MESSAGE[code]['msg']
         messages.add_message(request, messages.ERROR, msg)
-        return redirect('msk_shipping')
+        return redirect('shipping_total')
     
     df = raw_df.copy()
     
@@ -123,7 +128,7 @@ def convert_shipping_file(request):
     if not code == 0:
         msg = ERROR_MESSAGE[code]['msg']
         messages.add_message(request, messages.ERROR, msg)
-        return redirect('msk_shipping')
+        return redirect('shipping_total')
     
     # 도로가 분리된 df 받은 후 기존 df와 concat
     separated_df = get_separated_address_df(address_df)
@@ -157,14 +162,14 @@ def convert_shipping_file(request):
     
     msg = '작업에 성공했습니다.'
     messages.add_message(request, messages.SUCCESS, msg)
-    return redirect('msk_shipping')
+    return redirect('shipping_total')
 
     # # 홈사에 따라 파일을 DataFrame으로 변환
     # code, address_df = get_address_df(uploaded_file, shipping_company_name)
     # if not code == 0:
     #     msg = ERROR_MESSAGE[code]['msg']
     #     messages.add_message(request, messages.ERROR, msg)
-    #     return redirect('msk_shipping')
+    #     return redirect('shipping_total')
     
     # # 도로가 분리된 DataFrame을 받은 후 파일로 만듬
     # result_df = pd.DataFrame(get_separated_address_df(address_df))

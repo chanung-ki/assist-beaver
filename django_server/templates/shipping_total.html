@@ -1,0 +1,127 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block content %}
+    <div class="container-fluid px-4">
+        <h2 class="my-4">통합 출고 작업</h2>
+        <div class="row">
+            <div class="col-xl-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <div class="my-1">
+                            <i class="fa-solid fa-globe me-1"></i>
+                            통합 출고 작업
+                        </div>
+                    </div>
+                    <form action="{% url 'convert_shipping_file' %}" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="card-body py-4">
+                            <h4 class="small">한 문장의 주소를 City, Street, District로 분할하기 위한 작업입니다.</h4>
+                            <h4 class="small">작업하고자 하는 엑셀을 첨부한 뒤 "시작" 버튼을 눌러주세요 :)</h4>
+                            <div class="mt-4">
+                                <div class="mb-3">
+                                    <label for="shippingCompanyName" class="form-label"><span class="small">홈사 선택</span></label>
+                                    <select class="form-select form-select-sm" id="shippingCompanyName" name="shippingCompanyName" aria-label="shipping_company_name" required>
+                                        <option value="">홈사를 선택해주세요.</option>
+                                        {% for item in shipping_company_name %}
+                                            <option value="{{item.value}}">{{item.label}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="rawFile" class="form-label"><span class="small">파일 선택</span></label>
+                                    <input class="form-control form-control-sm" name="rawFile" id="rawFile" type="file" required>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <label class="form-label"><span class="small">상품 정보 입력</span></label>
+                                    <p class="item-container-add-text small mt-1" id="itemContainerAddText" onclick="">
+                                        <u>추가</u>
+                                    </p>
+                                </div>
+
+                                <div id="itemContainer1" class="p-3 border rounded">
+                                    <div class="mb-3">
+                                        <label for="itemCode" class="form-label"><span class="small">상품코드</span></label>
+                                        <input class="form-control form-control-sm" name="itemCode" id="itemCode" type="text" required>
+                                    </div>
+    
+                                    <div class="mb-3">
+                                        <label for="mainSKU" class="form-label"><span class="small">본품 SKU</span></label>
+                                        <input class="form-control form-control-sm" name="mainSku" id="mainSku" type="text" required>
+                                        <p class="sub-sku-add-text mt-1" id="subSkuAddText" onclick="addSubSku(this.id)">
+                                            <u>추가 구성품이 존재하면 여기를 클릭해주세요.</u>
+                                        </p>
+                                    </div>
+    
+                                    <div id="subSkuBox-subSkuAddText" class="mb-3" style="display: none;">
+                                        <label for="subSku" class="form-label"><span class="small">추가 구성품 SKU</span></label>
+                                        <div id="SubSkuContainer">
+                                            <div class="d-flex">
+                                                <input class="form-control form-control-sm" name="subSku[]" id="subSku" type="text" required>
+                                                <button id="SubSkuBtn" type="button" class="btn btn-success btn-sm ms-3"><span class="px-1">+</span></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="card-footer d-flex justify-content-end">
+                            <button type="submit" class="btn btn-sm btn-secondary custom-btn-bg custom-btn-border">시작</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#SubSkuBtn').on('click', function() {
+                // 새로운 input 요소 생성
+                var newInput = '<div class="d-flex mt-2">' +
+                                '<input class="form-control form-control-sm" name="subSku[]" type="text" required>' +
+                                '<button type="button" class="btn btn-secondary btn-sm ms-3 remove-btn"><span class="px-1">-</span></button>' +
+                                '</div>';
+                // SubSkuContainer에 추가
+                $('#SubSkuContainer').append(newInput);
+            });
+    
+            // 동적으로 추가된 input의 제거 기능
+            $(document).on('click', '.remove-btn', function() {
+                $(this).parent().remove();
+            });
+        });
+    </script>
+
+    <script>
+        function addSubSku(elementId) {
+            $("#" + elementId).hide();
+            $("#subSkuBox-" + elementId).show();
+        }
+    </script>
+
+
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="mb-4 pb-3 pe-3 show position-fixed bottom-0 end-0 z-index-99 col-xl-4">
+                <div class="alert 
+                    {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                        alert-danger
+                    {% else %}
+                        alert-success
+                    {% endif %}
+                    alert-outline alert-dismissible" role="alert">
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <div class="alert-icon">
+                        <i class="far fa-fw fa-bell me-1"></i> 
+                        <span class="small">{{ message.message }}</span>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+{% endblock %}

@@ -11285,3 +11285,14 @@ body {
   font-size: 0.75rem;
   border-radius: 0.375rem !important;
 }
+
+.item-container-add-text {
+  color: #754E1A;
+  cursor: pointer;
+}
+
+.sub-sku-add-text {
+  color: #754E1A;
+  font-size: 12px;
+  cursor: pointer;
+}
