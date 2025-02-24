@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseServerError
+from django.http import JsonResponse
+import json
 import pandas as pd
 import os
 from io import BytesIO
@@ -86,30 +88,20 @@ def separate_address(request):
 
 @login_required
 def convert_shipping_file(request):
-    if not request.method == 'POST':
-        msg = '잘못된 접근입니다.'
-        messages.add_message(request, messages.ERROR, msg)
-        return redirect('index')
 
-    shipping_company_name = request.POST.get('shippingCompanyName', '')
-    if not shipping_company_name:
-        msg = '홈사를 선택해주세요.'
-        messages.add_message(request, messages.ERROR, msg)
-        return redirect('shipping_total')
-    
-    uploaded_file = request.FILES.get('rawFile')
-    if not uploaded_file:
-        msg = '파일을 첨부해주세요.'
-        messages.add_message(request, messages.ERROR, msg)
-        return redirect('shipping_total')
-    
+    if not request.method == 'POST':
+        response = HttpResponseServerError('잘못된 접근입니다.')
+
+    uploaded_file = request.FILES.get("rawFile")
+    json_data = request.POST.get("jsonData")
+    data = json.loads(json_data)
+    shipping_company_name = data['shippingCompanyNameValue']
     
     # 홈사에 따라 파일을 DataFrame으로 변환
     code, raw_df = get_df(uploaded_file, shipping_company_name)
     if not code == 0:
         msg = ERROR_MESSAGE[code]['msg']
-        messages.add_message(request, messages.ERROR, msg)
-        return redirect('shipping_total')
+        response = HttpResponseServerError(msg)
     
     df = raw_df.copy()
     
@@ -127,8 +119,7 @@ def convert_shipping_file(request):
     code, address_df = get_address_df(df, shipping_company_name)
     if not code == 0:
         msg = ERROR_MESSAGE[code]['msg']
-        messages.add_message(request, messages.ERROR, msg)
-        return redirect('shipping_total')
+        response = HttpResponseServerError(msg)
     
     # 도로가 분리된 df 받은 후 기존 df와 concat
     separated_df = get_separated_address_df(address_df)
@@ -137,49 +128,24 @@ def convert_shipping_file(request):
     
     """Task 4 - """
 
-
-    # df_sheet1 = df.iloc[:50]  # 1~50행
-    # df_sheet2 = df.iloc[50:]  # 51행 이후
+    df_sheet1 = df.iloc[:50]  # 1~50행
+    df_sheet2 = df.iloc[50:]  # 51행 이후
     
-    # output = BytesIO()
+    output = BytesIO()
     
-    # with pd.ExcelWriter(output, engine="openpyxl") as writer:
-    #     df_sheet1.to_excel(writer, sheet_name="Sheet1", index=False)
-    #     df_sheet2.to_excel(writer, sheet_name="Sheet2", index=False)
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df_sheet1.to_excel(writer, sheet_name="Sheet1", index=False)
+        df_sheet2.to_excel(writer, sheet_name="Sheet2", index=False)
         
-    #     writer._save()  # writer 종료 후 저장 (pandas 2.0 이상에서는 생략 가능)
+        writer._save()  # writer 종료 후 저장 (pandas 2.0 이상에서는 생략 가능)
 
-    # output.seek(0)  # 파일의 시작 부분으로 이동
+    output.seek(0)  # 파일의 시작 부분으로 이동
 
-    # # HttpResponse로 파일 반환
-    # response = HttpResponse(output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    # file_name = f'{shipping_company_name}.xlsx'
-    # response['Content-Disposition'] = f'attachment; filename="{file_name}"'
+    # HttpResponse로 파일 반환
+    response = HttpResponse(output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    file_name = f'{shipping_company_name}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename="{file_name}"'
+    # response = HttpResponseServerError('갓디용')
     
-    # return response
-    
-    
-    
-    msg = '작업에 성공했습니다.'
-    messages.add_message(request, messages.SUCCESS, msg)
-    return redirect('shipping_total')
+    return response
 
-    # # 홈사에 따라 파일을 DataFrame으로 변환
-    # code, address_df = get_address_df(uploaded_file, shipping_company_name)
-    # if not code == 0:
-    #     msg = ERROR_MESSAGE[code]['msg']
-    #     messages.add_message(request, messages.ERROR, msg)
-    #     return redirect('shipping_total')
-    
-    # # 도로가 분리된 DataFrame을 받은 후 파일로 만듬
-    # result_df = pd.DataFrame(get_separated_address_df(address_df))
-    
-    # output = BytesIO()
-    # result_df.to_excel(output, index=False)
-    # output.seek(0)  # 파일 시작으로 이동
-
-    # # HttpResponse로 파일 반환
-    # response = HttpResponse(output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    # file_name = f'{shipping_company_name}-separated-address.xlsx'
-    # response['Content-Disposition'] = f'attachment; filename="{file_name}"'
-    # return response

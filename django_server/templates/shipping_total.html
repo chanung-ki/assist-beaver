@@ -13,11 +13,10 @@
                             통합 출고 작업
                         </div>
                     </div>
-                    <form action="{% url 'convert_shipping_file' %}" method="post" enctype="multipart/form-data">
+                    <form method="post" enctype="multipart/form-data" id="jsonForm">
                         {% csrf_token %}
                         <div class="card-body py-4">
-                            <h4 class="small">한 문장의 주소를 City, Street, District로 분할하기 위한 작업입니다.</h4>
-                            <h4 class="small">작업하고자 하는 엑셀을 첨부한 뒤 "시작" 버튼을 눌러주세요 :)</h4>
+                            <h4 class="small">모든 Task 작업을 한번에 수행할 수 있는 작업입니다.</h4>
                             <div class="mt-4">
                                 <div class="mb-3">
                                     <label for="shippingCompanyName" class="form-label"><span class="small">홈사 선택</span></label>
@@ -28,41 +27,23 @@
                                         {% endfor %}
                                     </select>
                                 </div>
+                                
                                 <div class="mb-3">
                                     <label for="rawFile" class="form-label"><span class="small">파일 선택</span></label>
                                     <input class="form-control form-control-sm" name="rawFile" id="rawFile" type="file" required>
                                 </div>
-
+                    
+                                <!-- 상품 정보 추가 -->
                                 <div class="d-flex justify-content-between">
                                     <label class="form-label"><span class="small">상품 정보 입력</span></label>
-                                    <p class="item-container-add-text small mt-1" id="itemContainerAddText" onclick="">
-                                        <u>추가</u>
+                                    <p class="item-container-add-text small mt-1" id="addItem">
+                                        <u>상품 추가</u>
                                     </p>
                                 </div>
-
-                                <div id="itemContainer1" class="p-3 border rounded">
-                                    <div class="mb-3">
-                                        <label for="itemCode" class="form-label"><span class="small">상품코드</span></label>
-                                        <input class="form-control form-control-sm" name="itemCode" id="itemCode" type="text" required>
-                                    </div>
-    
-                                    <div class="mb-3">
-                                        <label for="mainSKU" class="form-label"><span class="small">본품 SKU</span></label>
-                                        <input class="form-control form-control-sm" name="mainSku" id="mainSku" type="text" required>
-                                        <p class="sub-sku-add-text mt-1" id="subSkuAddText" onclick="addSubSku(this.id)">
-                                            <u>추가 구성품이 존재하면 여기를 클릭해주세요.</u>
-                                        </p>
-                                    </div>
-    
-                                    <div id="subSkuBox-subSkuAddText" class="mb-3" style="display: none;">
-                                        <label for="subSku" class="form-label"><span class="small">추가 구성품 SKU</span></label>
-                                        <div id="SubSkuContainer">
-                                            <div class="d-flex">
-                                                <input class="form-control form-control-sm" name="subSku[]" id="subSku" type="text" required>
-                                                <button id="SubSkuBtn" type="button" class="btn btn-success btn-sm ms-3"><span class="px-1">+</span></button>
-                                            </div>
-                                        </div>
-                                    </div>
+                    
+                                <div id="itemsContainer">
+                                    <!-- 상품 정보 폼이 추가될 부분 -->
+                                     
                                 </div>
 
                             </div>
@@ -77,31 +58,199 @@
     </div>
 
     <script>
-        $(document).ready(function() {
-            $('#SubSkuBtn').on('click', function() {
-                // 새로운 input 요소 생성
-                var newInput = '<div class="d-flex mt-2">' +
-                                '<input class="form-control form-control-sm" name="subSku[]" type="text" required>' +
-                                '<button type="button" class="btn btn-secondary btn-sm ms-3 remove-btn"><span class="px-1">-</span></button>' +
-                                '</div>';
-                // SubSkuContainer에 추가
-                $('#SubSkuContainer').append(newInput);
+        $(document).ready(function () {
+            let itemIndex = 0;
+
+            // 상품 추가
+            $("#addItem").click(function () {
+                let itemHtml = `
+                    <div class="p-3 border rounded mb-3 item">
+                        <div class="mb-3">
+                            <label class="form-label"><span class="small">상품코드</span></label>
+                            <input class="form-control form-control-sm" name="itemCode" type="text" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label"><span class="small">본품 SKU</span></label>
+                            <input class="form-control form-control-sm" name="mainSku" type="text" required>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input toggleSubSku" name="isSubSkuExist" type="checkbox" id="toggleSubSku">
+                                <label class="form-check-label" for="toggleSubSku">
+                                    <span class="small">추가 구성품</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 subSkuSection" style="display: none;">
+                            <label class="form-label"><span class="small">추가 구성품 SKU</span></label>
+                            <div class="subSkuContainer">
+                                <div class="subSkuBox">
+                                    <div class="d-flex">
+                                        <input class="form-control form-control-sm" name="subSku" type="text">
+                                        <button type="button" class="btn btn-success btn-sm ms-3 addSubSku">
+                                            <span class="px-1">+</span>
+                                        </button>
+                                    </div>
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="checkbox" name="isZa04">
+                                        <label class="form-check-label" for="isZa04">
+                                            <span class="small">ZA04</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary btn-sm removeItem">삭제</button>
+                        </div>
+                    </div>
+                `;
+                $("#itemsContainer").append(itemHtml);
+                itemIndex++;
             });
-    
-            // 동적으로 추가된 input의 제거 기능
-            $(document).on('click', '.remove-btn', function() {
-                $(this).parent().remove();
+
+            // 체크박스 변경 시 추가 구성품 입력 필드 토글
+            $(document).on("change", ".toggleSubSku", function () {
+                let subSkuSection = $(this).closest(".item").find(".subSkuSection");
+                if ($(this).is(":checked")) {
+                    subSkuSection.show();
+                } else {
+                    subSkuSection.hide();
+                }
             });
+
+
+            // 추가 구성품 SKU 추가
+            $(document).on("click", ".addSubSku", function () {
+                let subSkuHtml = `
+                <div class="subSkuBox">
+                    <div class="d-flex mt-2">
+                        <input class="form-control form-control-sm" name="subSku" type="text">
+                        <button type="button" class="btn btn-danger btn-sm ms-3 removeSubSku">
+                            <span class="px-1">-</span>
+                        </button>
+                    </div>
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" name="isZa04">
+                        <label class="form-check-label" for="isZa04">
+                            <span class="small">ZA04</span>
+                        </label>
+                    </div>
+                </<div>
+                `;
+                $(this).closest(".subSkuContainer").append(subSkuHtml);
+            });
+
+            // 상품 삭제
+            $(document).on("click", ".removeItem", function () {
+                $(this).closest(".item").remove();
+            });
+
+            // 추가 구성품 SKU 삭제
+            $(document).on("click", ".removeSubSku", function () {
+                $(this).closest(".subSkuBox").remove();
+            });
+
+            // 폼 제출 시 데이터 처리
+            $("#jsonForm").submit(function (event) {
+                event.preventDefault(); // 기본 제출 방지
+
+                if (itemIndex > 0) {
+                    let items = [];
+                    $("#itemsContainer .item").each(function () {
+                        let itemCode = $(this).find('input[name="itemCode"]').val();
+                        let mainSku = $(this).find('input[name="mainSku"]').val();
+                        let isSubSkuExist = $(this).find('input[name="isSubSkuExist"]').is(":checked");
+                        let subSkus = [];
+                        $(this).find('.subSkuSection .subSkuBox').each(function () {
+                            let subSku = $(this).find('input[name="subSku"]').val();
+                            let isZa04 = $(this).find('input[name="isZa04"]').is(":checked"); // 사은품 체크
+                            if (subSku.trim() !== "") {
+                                subSkus.push({
+                                    subSku: subSku,
+                                    isZa04: isZa04
+                                });
+                            }
+                        });
+                        items.push({
+                            item: itemCode,
+                            sku: mainSku,
+                            isSubSkuExist: isSubSkuExist,
+                            subSku: subSkus
+                        });
+                    });
+
+                    let shippingCompanyNameValue = $('#shippingCompanyName').val();
+
+                    jsonData = {
+                        items: items,
+                        shippingCompanyNameValue: shippingCompanyNameValue
+
+                    }
+
+                    let formData = new FormData();
+                    formData.append("jsonData", JSON.stringify(jsonData)); // JSON 데이터 추가
+
+                    let rawFile = $("#rawFile")[0].files[0];
+                    if (rawFile) {
+                        formData.append("rawFile", rawFile); // 엑셀 파일 추가
+                    }
+
+                    fetch("/msk/convert/shipping-file", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": getCookie("csrftoken")
+                        },
+                        body: formData
+                    })
+                    .then(response => {
+                        if (!response.ok) {  // 응답 상태가 200번대가 아닌 경우 (500 등의 오류)
+                          return response.text();  // 오류 메시지를 텍스트로 읽기
+                        }
+                        return response.blob();  // 성공적인 응답은 파일 처리
+                    })
+                    .then(data => {
+                        if (data instanceof Blob) {
+                            const fileUrl = window.URL.createObjectURL(data);
+                            const link = document.createElement('a');
+                            link.href = fileUrl;
+                            link.style.display = 'none';
+                            link.download = 'shipping_file.xlsx';  // 다운로드할 파일 이름 설정
+                            document.body.appendChild(link);
+                            link.click();  // 다운로드 실행
+                            link.remove();
+                            window.URL.revokeObjectURL(fileUrl);  // URL 메모리 해제
+                            alert('갓띠용~ 엑셀 다운로드가 완료되었습니다.');
+                        } else {
+                            // 서버 오류 메시지를 표시
+                            alert('갓띠용~' + data);
+                        }
+                    })
+                    .catch(error => {
+                        alert('갓띠용~ 오류 발생 비버에게 문의하세요.');
+                    });
+                } else {
+                    alert('갓땜~ 상품을 추가해야지~~');
+                }
+            });
+
+            // CSRF 토큰 가져오기
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    let cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        let cookie = cookies[i].trim();
+                        if (cookie.startsWith(name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
         });
     </script>
-
-    <script>
-        function addSubSku(elementId) {
-            $("#" + elementId).hide();
-            $("#subSkuBox-" + elementId).show();
-        }
-    </script>
-
 
 
     {% if messages %}
