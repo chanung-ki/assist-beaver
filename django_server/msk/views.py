@@ -95,76 +95,74 @@ def convert_shipping_file(request):
         error 메시지 추가하자!
     """
 
-    # if not request.method == 'POST':
-    #     response = HttpResponseServerError('잘못된 접근입니다.')
-    #     return response
+    if not request.method == 'POST':
+        response = HttpResponseServerError('잘못된 접근입니다.')
+        return response
 
-    # # 엑셀 파일
-    # uploaded_file = request.FILES.get("rawFile")
-    # # 출가 부가정보
-    # json_data = request.POST.get("jsonData")
-    # item_data = json.loads(json_data)
-    # # 상품 정보 추출
-    # item_info = item_data['items']
-    # # 홈사 정보 추출
-    # shipping_company_name = item_data['shippingCompanyNameValue']
+    # 엑셀 파일
+    uploaded_file = request.FILES.get("rawFile")
+    # 출가 부가정보
+    json_data = request.POST.get("jsonData")
+    item_data = json.loads(json_data)
+    # 상품 정보 추출
+    item_info = item_data['items']
+    # 홈사 정보 추출
+    shipping_company_name = item_data['shippingCompanyNameValue']
     
-    # # 홈사에 따라 파일을 DataFrame으로 변환
-    # code, raw_df = get_df(uploaded_file, shipping_company_name)
-    # if not code == 0:
-    #     msg = ERROR_MESSAGE[code]['msg']
-    #     response = HttpResponseServerError(msg)
-    #     return response
+    # 홈사에 따라 파일을 DataFrame으로 변환
+    code, raw_df = get_df(uploaded_file, shipping_company_name)
+    if not code == 0:
+        msg = ERROR_MESSAGE[code]['msg']
+        response = HttpResponseServerError(msg)
+        return response
     
-    # df = raw_df.copy()
+    df = raw_df.copy()
     
-    # """Task 0 - 불필요한 컬럼 제거"""
-    # required_column = REQUIRED_COLUMN[shipping_company_name]
-    # df = df[required_column]
+    """Task 0 - 불필요한 컬럼 제거"""
+    required_column = REQUIRED_COLUMN[shipping_company_name]
+    df = df[required_column]
     
-    # """Task 1 - 성함, 전화번호 작업"""
-    # df = fill_name_and_hp(df, shipping_company_name)
+    """Task 1 - 성함, 전화번호 작업"""
+    df = fill_name_and_hp(df, shipping_company_name)
     
-    # """Task 2 - 주문번호 가공 작업"""
-    # df = convert_order_number(df, shipping_company_name)
+    """Task 2 - 주문번호 가공 작업"""
+    df = convert_order_number(df, shipping_company_name)
     
-    # """Task 3 - 주소 분리 작업"""
-    # code, address_df = get_address_df(df, shipping_company_name)
-    # if not code == 0:
-    #     msg = ERROR_MESSAGE[code]['msg']
-    #     response = HttpResponseServerError(msg)
-    #     return response
+    """Task 3 - 주소 분리 작업"""
+    code, address_df = get_address_df(df, shipping_company_name)
+    if not code == 0:
+        msg = ERROR_MESSAGE[code]['msg']
+        response = HttpResponseServerError(msg)
+        return response
         
-    # # 도로가 분리된 df 받은 후 기존 df와 concat
-    # separated_df = get_separated_address_df(address_df)
+    # 도로가 분리된 df 받은 후 기존 df와 concat
+    separated_df = get_separated_address_df(address_df)
     
-    # del separated_df['address']
+    del separated_df['address']
     
-    # # 기존 df와 주소 df를 병합
-    # df = pd.concat([df.reset_index(drop=True), separated_df.reset_index(drop=True)], axis=1)
+    # 기존 df와 주소 df를 병합
+    df = pd.concat([df.reset_index(drop=True), separated_df.reset_index(drop=True)], axis=1)
     
-    # """Task 4 - 상품 정보를 기반으로 sku별로 row 확장 작업"""
-    # try:
-    #     df_list = get_exploded_df_list(df, shipping_company_name, item_info)
-    # except:
-    #     response = HttpResponseServerError('갓디용,, 오류 발생 비버에게 문의하라')
-    #     return response
+    """Task 4 - 상품 정보를 기반으로 sku별로 row 확장 작업"""
+    try:
+        df_list = get_exploded_df_list(df, shipping_company_name, item_info)
+    except:
+        response = HttpResponseServerError('갓디용,, 오류 발생 비버에게 문의하라')
+        return response
     
-    # output = BytesIO()
+    output = BytesIO()
     
-    # with pd.ExcelWriter(output, engine="openpyxl") as writer:
-    #     for idx, df in enumerate(df_list):
-    #         sheet_name = f"Sheet{idx + 1}"  # 시트 이름을 동적으로 설정 (Sheet1, Sheet2, ...)
-    #         df.to_excel(writer, sheet_name=sheet_name, index=False)
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        for idx, df in enumerate(df_list):
+            sheet_name = f"Sheet{idx + 1}"  # 시트 이름을 동적으로 설정 (Sheet1, Sheet2, ...)
+            df.to_excel(writer, sheet_name=sheet_name, index=False)
         
-    # output.seek(0)  # 파일의 시작 부분으로 이동
+    output.seek(0)  # 파일의 시작 부분으로 이동
 
-    # # HttpResponse로 파일 반환
-    # response = HttpResponse(output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    # file_name = f'{shipping_company_name}.xlsx'
-    # response['Content-Disposition'] = f'attachment; filename="{file_name}"'
+    # HttpResponse로 파일 반환
+    response = HttpResponse(output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    file_name = f'{shipping_company_name}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename="{file_name}"'
     
-    
-    response = HttpResponseServerError('갓디용,, 오류 발생 비버에게 문의하라')
     return response
 
