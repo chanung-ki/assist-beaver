@@ -12,6 +12,7 @@ from .utills import get_df
 from .tasks.task1 import fill_name_and_hp
 from .tasks.task2 import convert_order_number
 from .tasks.task3 import get_address_df, get_separated_address_df
+from .tasks.task4 import get_exploded_df_list
 from .constants import ERROR_MESSAGE, SHIPPING_COMPANY_NAME, REQUIRED_COLUMN
 
 # Create your views here.
@@ -88,14 +89,24 @@ def separate_address(request):
 
 @login_required
 def convert_shipping_file(request):
+    
+    """
+        try,
+        error 메시지 추가하자!
+    """
 
     if not request.method == 'POST':
         response = HttpResponseServerError('잘못된 접근입니다.')
 
+    # 엑셀 파일
     uploaded_file = request.FILES.get("rawFile")
+    # 출가 부가정보
     json_data = request.POST.get("jsonData")
-    data = json.loads(json_data)
-    shipping_company_name = data['shippingCompanyNameValue']
+    item_data = json.loads(json_data)
+    # 상품 정보 추출
+    item_info = item_data['items']
+    # 홈사 정보 추출
+    shipping_company_name = item_data['shippingCompanyNameValue']
     
     # 홈사에 따라 파일을 DataFrame으로 변환
     code, raw_df = get_df(uploaded_file, shipping_company_name)
@@ -105,7 +116,7 @@ def convert_shipping_file(request):
     
     df = raw_df.copy()
     
-    """불필요한 컬럼 제거"""
+    """Task 0 - 불필요한 컬럼 제거"""
     required_column = REQUIRED_COLUMN[shipping_company_name]
     df = df[required_column]
     
@@ -126,25 +137,23 @@ def convert_shipping_file(request):
     del separated_df['address']
     df = pd.concat([df, separated_df], axis=1)
     
-    """Task 4 - """
-
-    df_sheet1 = df.iloc[:50]  # 1~50행
-    df_sheet2 = df.iloc[50:]  # 51행 이후
+    """Task 4 - 상품 정보를 기반으로 sku별로 row 확장 작업"""
+    df_list = get_exploded_df_list(df, shipping_company_name, item_info)
     
     output = BytesIO()
     
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
-        df_sheet1.to_excel(writer, sheet_name="Sheet1", index=False)
-        df_sheet2.to_excel(writer, sheet_name="Sheet2", index=False)
+        for idx, df in enumerate(df_list):
+            sheet_name = f"Sheet{idx + 1}"  # 시트 이름을 동적으로 설정 (Sheet1, Sheet2, ...)
+            df.to_excel(writer, sheet_name=sheet_name, index=False)
         
-        writer._save()  # writer 종료 후 저장 (pandas 2.0 이상에서는 생략 가능)
-
     output.seek(0)  # 파일의 시작 부분으로 이동
 
     # HttpResponse로 파일 반환
     response = HttpResponse(output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     file_name = f'{shipping_company_name}.xlsx'
     response['Content-Disposition'] = f'attachment; filename="{file_name}"'
+    
     # response = HttpResponseServerError('갓디용')
     
     return response

@@ -38,6 +38,7 @@ COLUMN_INFO = {
         'base_hp': '인수자hp',
         'sub_hp': '인수자tel',
         'order_number': '주문번호',
+        'item_code': '상품코드'
     },
     'GS' : {
         'address': '수취인주소',

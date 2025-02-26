@@ -215,7 +215,7 @@
                             const link = document.createElement('a');
                             link.href = fileUrl;
                             link.style.display = 'none';
-                            link.download = 'shipping_file.xlsx';  // 다운로드할 파일 이름 설정
+                            link.download = shippingCompanyNameValue + '_file.xlsx';  // 다운로드할 파일 이름 설정
                             document.body.appendChild(link);
                             link.click();  // 다운로드 실행
                             link.remove();
