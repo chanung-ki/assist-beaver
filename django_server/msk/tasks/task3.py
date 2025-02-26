@@ -8,13 +8,13 @@ def get_address_df(df, shipping_company_name):
         홈사에 따라 df에서 address df만 반환
     """
     column_name = COLUMN_INFO[shipping_company_name]['address']
-    try:
-        # 주소가 공백인 행 제거
-        df = df.dropna(subset=[column_name])
-    except:
-        # 홈사와, 홈사파일을 일치시켜서 첨부하지 않은 경우 code=1 반환
-        # ex 홈사 : CJ , 파일 : GS 파일
-        return 1, None
+    # try:
+    #     # 주소가 공백인 행 제거
+    #     df = df.dropna(subset=[column_name])
+    # except:
+    #     # 홈사와, 홈사파일을 일치시켜서 첨부하지 않은 경우 code=1 반환
+    #     # ex 홈사 : CJ , 파일 : GS 파일
+    #     return 1, None
     address_df = df[column_name]
     address_df = address_df.str.strip()
 
@@ -109,7 +109,7 @@ def get_separated_address_df(address_df):
             'city': city,
             'street': street,
             'district': district,
-            'category': category
+            '구주소 여부': category
         })
         
         

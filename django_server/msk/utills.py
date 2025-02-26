@@ -32,6 +32,9 @@ def get_df(uploaded_file, shipping_company_name):
         data = ws.values
         columns = next(data)
         df = pd.DataFrame(data, columns=columns)
+        # 컬럼에 개행이 있을경우 제거
+        df.columns = [col.replace('\n', '') if col is not None else "" for col in df.columns]
+        df = df.drop(0)
         
     else:
         try:

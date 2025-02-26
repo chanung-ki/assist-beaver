@@ -2,7 +2,9 @@
 {% load static %}
 
 {% block content %}
-    <div class="container-fluid px-4">
+
+    <span class="loader"></span>
+    <div class="container-fluid px-4 main-div">
         <h2 class="my-4">통합 출고 작업</h2>
         <div class="row">
             <div class="col-xl-6">
@@ -86,7 +88,7 @@
                             <div class="subSkuContainer">
                                 <div class="subSkuBox">
                                     <div class="d-flex">
-                                        <input class="form-control form-control-sm" name="subSku" type="text">
+                                        <input class="form-control form-control-sm first-sub-sku" name="subSku" type="text">
                                         <button type="button" class="btn btn-success btn-sm ms-3 addSubSku">
                                             <span class="px-1">+</span>
                                         </button>
@@ -114,18 +116,19 @@
                 let subSkuSection = $(this).closest(".item").find(".subSkuSection");
                 if ($(this).is(":checked")) {
                     subSkuSection.show();
+                    subSkuSection.find(".first-sub-sku").prop("required", true);
                 } else {
                     subSkuSection.hide();
+                    subSkuSection.find(".first-sub-sku").prop("required", false);
                 }
             });
-
 
             // 추가 구성품 SKU 추가
             $(document).on("click", ".addSubSku", function () {
                 let subSkuHtml = `
                 <div class="subSkuBox">
                     <div class="d-flex mt-2">
-                        <input class="form-control form-control-sm" name="subSku" type="text">
+                        <input class="form-control form-control-sm" name="subSku" type="text" required>
                         <button type="button" class="btn btn-danger btn-sm ms-3 removeSubSku">
                             <span class="px-1">-</span>
                         </button>
@@ -156,6 +159,9 @@
                 event.preventDefault(); // 기본 제출 방지
 
                 if (itemIndex > 0) {
+
+                    setLoading(true);
+
                     let items = [];
                     $("#itemsContainer .item").each(function () {
                         let itemCode = $(this).find('input[name="itemCode"]').val();
@@ -210,6 +216,8 @@
                         return response.blob();  // 성공적인 응답은 파일 처리
                     })
                     .then(data => {
+                        setLoading(false);
+
                         if (data instanceof Blob) {
                             const fileUrl = window.URL.createObjectURL(data);
                             const link = document.createElement('a');
@@ -227,6 +235,8 @@
                         }
                     })
                     .catch(error => {
+                        setLoading(false);
+
                         alert('갓띠용~ 오류 발생 비버에게 문의하세요.');
                     });
                 } else {
@@ -248,6 +258,16 @@
                     }
                 }
                 return cookieValue;
+            }
+
+            function setLoading(isLoading) {
+                if (isLoading == true){
+                    $('.loader').show();
+                    $('.main-div').addClass('opacity-50');
+                } else {
+                    $('.loader').hide();
+                    $('.main-div').removeClass('opacity-50');
+                }
             }
         });
     </script>
